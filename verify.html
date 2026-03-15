@@ -1,42 +1,176 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Verify Key</title>
+<title>Verify API Keys</title>
+
+<style>
+
+body{
+background:black;
+color:#00ff99;
+font-family:Arial;
+text-align:center;
+padding:40px;
+}
+
+.box{
+border:2px solid #00ff99;
+padding:25px;
+border-radius:15px;
+max-width:500px;
+margin:auto;
+box-shadow:0 0 20px #00ff99;
+}
+
+.status{
+margin-top:15px;
+line-height:1.6;
+}
+
+.valid{
+color:#00ff99;
+}
+
+.invalid{
+color:red;
+}
+
+</style>
+
 </head>
 
-<body style="background:black;color:white;text-align:center;padding:40px">
+<body>
 
-<h2>Verifying API Key...</h2>
+<div class="box">
 
-<p id="status">Mohon tunggu...</p>
+<h2>Memverifikasi API Key...</h2>
+
+<div id="status" class="status">Mohon tunggu...</div>
+
+</div>
 
 <script>
 
 async function verify(){
 
-let key=localStorage.getItem("OPENAI_KEY")
+let openai = localStorage.getItem("OPENAI_KEY")
+let deepseek = localStorage.getItem("DEEPSEEK_KEY")
+let gemini = localStorage.getItem("GEMINI_KEY")
 
-let res=await fetch("https://api.openai.com/v1/models",{
+let result=""
+let valid=false
+
+
+/* ---------- OPENAI ---------- */
+
+if(openai){
+
+try{
+
+let r = await fetch("https://api.openai.com/v1/models",{
 
 headers:{
-"Authorization":"Bearer "+key
+Authorization:"Bearer "+openai
 }
 
 })
 
-if(res.status===200){
+if(r.status===200){
 
-document.getElementById("status").innerText="API Key Valid ✔"
+result += "<div class='valid'>OpenAI Key Valid ✔</div>"
+valid=true
+
+}else{
+
+result += "<div class='invalid'>OpenAI Key Tidak Valid</div>"
+
+}
+
+}catch{
+
+result += "<div class='invalid'>OpenAI Error</div>"
+
+}
+
+}
+
+
+/* ---------- DEEPSEEK ---------- */
+
+if(deepseek){
+
+try{
+
+let r = await fetch("https://api.deepseek.com/v1/models",{
+
+headers:{
+Authorization:"Bearer "+deepseek
+}
+
+})
+
+if(r.status===200){
+
+result += "<div class='valid'>DeepSeek Key Valid ✔</div>"
+valid=true
+
+}else{
+
+result += "<div class='invalid'>DeepSeek Key Tidak Valid</div>"
+
+}
+
+}catch{
+
+result += "<div class='invalid'>DeepSeek Error</div>"
+
+}
+
+}
+
+
+/* ---------- GEMINI ---------- */
+
+if(gemini){
+
+try{
+
+let r = await fetch(
+"https://generativelanguage.googleapis.com/v1/models?key="+gemini
+)
+
+if(r.status===200){
+
+result += "<div class='valid'>Gemini Key Valid ✔</div>"
+valid=true
+
+}else{
+
+result += "<div class='invalid'>Gemini Key Tidak Valid</div>"
+
+}
+
+}catch{
+
+result += "<div class='invalid'>Gemini Error</div>"
+
+}
+
+}
+
+
+document.getElementById("status").innerHTML=result
+
+
+/* redirect jika ada key valid */
+
+if(valid){
 
 setTimeout(()=>{
 
 window.location="generator.html"
 
-},1500)
-
-}else{
-
-document.getElementById("status").innerText="API Key Tidak Valid"
+},2000)
 
 }
 
