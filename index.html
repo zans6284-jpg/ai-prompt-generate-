@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Generator System</title>
+
+<style>
+
+body{
+background:#000;
+color:white;
+font-family:Arial;
+text-align:center;
+padding:20px;
+}
+
+.box{
+border:2px solid #00ff66;
+padding:20px;
+border-radius:15px;
+max-width:500px;
+margin:auto;
+margin-bottom:25px;
+box-shadow:0 0 20px #00ff66;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:8px 0;
+background:black;
+border:1px solid #00ff66;
+color:white;
+}
+
+button{
+background:#00ff66;
+border:none;
+padding:10px;
+cursor:pointer;
+width:100%;
+margin-top:8px;
+}
+
+.user{
+border-bottom:1px solid gray;
+padding:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="box" id="auth">
+
+<h2>LOGIN</h2>
+
+<input id="loginEmail" placeholder="Email">
+<input id="loginPass" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<h3>REGISTER</h3>
+
+<input id="regUser" placeholder="Username">
+<input id="regEmail" placeholder="Email">
+<input id="regPass" type="password" placeholder="Password">
+
+<button onclick="register()">Register</button>
+
+</div>
+
+
+<div class="box" id="generator" style="display:none">
+
+<h2>AI RP STORY GENERATOR</h2>
+
+<textarea id="prompt" placeholder="Contoh: buatkan saya cerita RP Kekuasaanku"></textarea>
+
+<button onclick="generate()">Generate Cerita AI</button>
+
+<h3>Output Cerita</h3>
+
+<textarea id="output" rows="12"></textarea>
+
+</div>
+
+
+<div class="box" id="adminPanel" style="display:none">
+
+<h2>ADMIN PANEL</h2>
+
+<div id="users"></div>
+
+</div>
+
+
+<script>
+
+if(!localStorage.getItem("users")){
+localStorage.setItem("users",JSON.stringify([]))
+}
+
+const adminEmail="zans6284@gmail.com"
+const adminPass="Login saja"
+
+function register(){
+
+let username=regUser.value
+let email=regEmail.value
+let pass=regPass.value
+
+let db=JSON.parse(localStorage.getItem("users"))
+
+if(db.find(u=>u.email==email)){
+alert("Email sudah terdaftar")
+return
+}
+
+db.push({
+username,
+email,
+pass,
+banned:false
+})
+
+localStorage.setItem("users",JSON.stringify(db))
+
+alert("Akun berhasil dibuat")
+
+}
+
+function login(){
+
+let email=loginEmail.value
+let pass=loginPass.value
+
+if(email===adminEmail && pass===adminPass){
+
+auth.style.display="none"
+adminPanel.style.display="block"
+loadUsers()
+
+return
+
+}
+
+let db=JSON.parse(localStorage.getItem("users"))
+
+let user=db.find(u=>u.email==email && u.pass==pass)
+
+if(!user){
+alert("Login gagal")
+return
+}
+
+if(user.banned){
+alert("Akun diblokir admin")
+return
+}
+
+auth.style.display="none"
+generator.style.display="block"
+
+}
+
+function loadUsers(){
+
+let db=JSON.parse(localStorage.getItem("users"))
+
+let html=""
+
+db.forEach((u,i)=>{
+
+html+=`
+<div class="user">
+
+${u.username} | ${u.email} | banned:${u.banned}
+
+<button onclick="ban(${i})">Ban</button>
+<button onclick="unban(${i})">Unban</button>
+<button onclick="del(${i})">Delete</button>
+
+</div>
+`
+
+})
+
+users.innerHTML=html
+
+}
+
+function ban(i){
+
+let db=JSON.parse(localStorage.getItem("users"))
+
+db[i].banned=true
+
+localStorage.setItem("users",JSON.stringify(db))
+
+loadUsers()
+
+}
+
+function unban(i){
+
+let db=JSON.parse(localStorage.getItem("users"))
+
+db[i].banned=false
+
+localStorage.setItem("users",JSON.stringify(db))
+
+loadUsers()
+
+}
+
+function del(i){
+
+let db=JSON.parse(localStorage.getItem("users"))
+
+db.splice(i,1)
+
+localStorage.setItem("users",JSON.stringify(db))
+
+loadUsers()
+
+}
+
+
+async function generate(){
+
+let promptText=document.getElementById("prompt").value
+
+let res = await fetch("https://api.openai.com/v1/chat/completions",{
+
+method:"POST",
+
+let key = localStorage.getItem("OPENAI_KEY")
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + key
+},
+
+body:JSON.stringify({
+
+model:"gpt-4o-mini",
+
+messages:[
+
+{
+role:"system",
+content:"Kamu adalah AI yang membuat cerita RP panjang, epik, detail dan kreatif."
+},
+
+{
+role:"user",
+content:promptText
+}
+
+]
+
+})
+
+})
+
+let data=await res.json()
+
+document.getElementById("output").value =
+data.choices[0].message.content
+
+}
+
+</script>
+
+</body>
+</html>

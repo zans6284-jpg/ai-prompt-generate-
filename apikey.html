@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Masukkan API Key</title>
+
+<style>
+body{
+background:black;
+color:white;
+font-family:Arial;
+text-align:center;
+padding:20px;
+}
+
+.box{
+border:2px solid #00ff66;
+padding:20px;
+border-radius:15px;
+max-width:400px;
+margin:auto;
+box-shadow:0 0 20px #00ff66;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:10px;
+background:black;
+border:1px solid #00ff66;
+color:white;
+}
+
+button{
+background:#00ff66;
+border:none;
+padding:10px;
+margin-top:10px;
+width:100%;
+cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Masukkan OpenAI API Key</h2>
+
+<input id="apikey" placeholder="sk-xxxxxxxxxxxxxxxx">
+
+<button onclick="saveKey()">Save API Key</button>

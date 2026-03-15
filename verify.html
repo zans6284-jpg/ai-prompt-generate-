@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Verifikasi API Key</title>
+
+<style>
+body{background:black;color:white;font-family:Arial;text-align:center;padding:40px;}
+.box{border:2px solid #00ff66;padding:20px;border-radius:15px;max-width:400px;margin:auto;box-shadow:0 0 20px #00ff66;}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Memverifikasi API Key...</h2>
+
+<p id="status">Mohon tunggu...</p>
+
+</div>
+
+<script>
+
+async function verify(){
+
+let key=localStorage.getItem("OPENAI_KEY")
+
+if(!key){
+
+document.getElementById("status").innerText="API key tidak ditemukan"
+return
+
+}
+
+try{
+
+let res=await fetch("https://api.openai.com/v1/models",{
+
+headers:{
+"Authorization":"Bearer "+key
+}
+
+})
+
+if(res.status===200){
+
+document.getElementById("status").innerText="API Key Valid ✔"
+
+setTimeout(()=>{
+
+window.location="index.html"
+
+},2000)
+
+}else{
+
+document.getElementById("status").innerText="API Key tidak valid"
+
+}
+
+}catch{
+
+document.getElementById("status").innerText="Gagal memverifikasi"
+
+}
+
+}
+
+verify()
+
+</script>
+
+</body>
+</html>
