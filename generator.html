@@ -1,71 +1,208 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>AI Generator</title>
+<title>AI Prompt Generator</title>
 
 <style>
 
 body{
-background:black;
-color:#00ff66;
+background:#050505;
 font-family:Arial;
-text-align:center;
-padding:20px;
+color:#00ff99;
+margin:0;
 }
 
-.box{
-border:2px solid #00ff66;
-padding:20px;
-border-radius:15px;
-max-width:700px;
+body::before{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:
+linear-gradient(#00ff9920 1px, transparent 1px),
+linear-gradient(90deg,#00ff9920 1px, transparent 1px);
+background-size:40px 40px;
+animation:gridMove 8s linear infinite;
+z-index:-1;
+}
+
+@keyframes gridMove{
+0%{transform:translateY(0)}
+100%{transform:translateY(40px)}
+}
+
+.container{
+max-width:900px;
 margin:auto;
-box-shadow:0 0 20px #00ff66;
+padding:20px;
 }
 
-textarea{
+.card{
+background:#0a0a0a;
+border:1px solid #00ff99;
+border-radius:10px;
+padding:15px;
+margin-top:15px;
+box-shadow:0 0 15px #00ff99;
+}
+
+select,textarea{
 width:100%;
 padding:10px;
-margin:10px 0;
-background:black;
-border:1px solid #00ff66;
-color:white;
+margin-top:10px;
+background:#000;
+border:1px solid #00ff99;
+color:#00ff99;
 }
 
 button{
-background:#00ff66;
+background:#00ff99;
 border:none;
-padding:12px;
+padding:10px;
+margin-top:10px;
 cursor:pointer;
 width:100%;
 }
 
-</style>
+.library button{
+background:#111;
+border:1px solid #00ff99;
+color:#00ff99;
+margin-top:5px;
+}
 
+.actions{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.actions button{
+flex:1;
+}
+
+.status{
+margin-top:10px;
+font-size:14px;
+}
+
+</style>
 </head>
 
 <body>
 
-<h1>AI GENERATOR</h1>
+<div class="container">
 
-<div class="box">
+<h1>AI Generator</h1>
 
-<textarea id="prompt" placeholder="Masukkan prompt"></textarea>
+<div class="status" id="keyStatus"></div>
 
-<button onclick="generate()">Generate Prompt</button>
 
-<h3>Output</h3>
+<div class="card">
 
-<textarea id="output" rows="12"></textarea>
+<h3>AI Model Provider</h3>
+
+<select id="provider">
+<option value="openai">OpenAI</option>
+<option value="deepseek">DeepSeek</option>
+<option value="gemini">Gemini</option>
+</select>
+
+<select id="model">
+<option value="gpt-4o-mini">GPT-4o mini</option>
+<option value="deepseek-chat">DeepSeek Chat</option>
+<option value="gemini-pro">Gemini Pro</option>
+</select>
 
 </div>
 
+
+<div class="card">
+
+<h3>Prompt Library</h3>
+
+<div class="library">
+
+<button onclick="usePrompt('Buat cerita RP fantasy dengan kekuatan dewa.')">Fantasy RP</button>
+
+<button onclick="usePrompt('Buat cerita sci-fi tentang manusia yang menguasai AI.')">Sci-Fi Story</button>
+
+<button onclick="usePrompt('Buat dialog roleplay antara pahlawan dan penjahat.')">Hero RP</button>
+
+<button onclick="usePrompt('Buat prompt hypnotic yang kuat.')">Hypnotic</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Prompt</h3>
+
+<textarea id="prompt"></textarea>
+
+<button onclick="generate()">Generate</button>
+
+</div>
+
+
+<div class="card">
+
+<h3>Output</h3>
+
+<textarea id="output" rows="10"></textarea>
+
+<div class="actions">
+
+<button onclick="copyText()">Copy</button>
+<button onclick="downloadText()">Download</button>
+<button onclick="clearText()">Clear</button>
+
+</div>
+
+</div>
+
+</div>
+
+
 <script>
+
+function checkKey(){
+
+let key=localStorage.getItem("OPENAI_KEY")
+
+if(key){
+document.getElementById("keyStatus").innerText="API Key Aktif"
+}else{
+document.getElementById("keyStatus").innerText="API Key belum dimasukkan"
+}
+
+}
+
+checkKey()
+
+
+function usePrompt(text){
+
+document.getElementById("prompt").value=text
+
+}
+
 
 async function generate(){
 
 let prompt=document.getElementById("prompt").value
-
+let provider=document.getElementById("provider").value
+let model=document.getElementById("model").value
 let key=localStorage.getItem("OPENAI_KEY")
+
+document.getElementById("output").value="Generating..."
+
+try{
+
+if(provider==="openai"){
 
 let res=await fetch("https://api.openai.com/v1/chat/completions",{
 
@@ -77,14 +214,10 @@ headers:{
 },
 
 body:JSON.stringify({
-
-model:"gpt-4o-mini",
-
+model:model,
 messages:[
-{role:"system",content:"Buat prompt RP panjang dan kreatif"},
 {role:"user",content:prompt}
 ]
-
 })
 
 })
@@ -92,6 +225,62 @@ messages:[
 let data=await res.json()
 
 document.getElementById("output").value=data.choices[0].message.content
+
+}
+
+
+if(provider==="deepseek"){
+
+document.getElementById("output").value="DeepSeek API belum dikonfigurasi"
+
+}
+
+if(provider==="gemini"){
+
+document.getElementById("output").value="Gemini API belum dikonfigurasi"
+
+}
+
+}catch(e){
+
+document.getElementById("output").value="Error request"
+
+}
+
+}
+
+
+function copyText(){
+
+let text=document.getElementById("output")
+
+text.select()
+
+document.execCommand("copy")
+
+}
+
+
+function clearText(){
+
+document.getElementById("output").value=""
+
+}
+
+
+function downloadText(){
+
+let text=document.getElementById("output").value
+
+let blob=new Blob([text],{type:"text/plain"})
+
+let a=document.createElement("a")
+
+a.href=URL.createObjectURL(blob)
+
+a.download="prompt.txt"
+
+a.click()
 
 }
 

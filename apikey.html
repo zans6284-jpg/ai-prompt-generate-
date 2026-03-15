@@ -1,15 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>API Key</title>
+<title>API Key Setup</title>
 
 <style>
-body{background:black;color:white;font-family:Arial;text-align:center;padding:30px;}
-.box{border:2px solid #00ff66;padding:20px;border-radius:15px;max-width:450px;margin:auto;box-shadow:0 0 20px #00ff66;}
-input{width:100%;padding:10px;margin:8px 0;background:black;border:1px solid #00ff66;color:white;}
-button{background:#00ff66;border:none;padding:10px;width:100%;cursor:pointer;}
-</style>
 
+body{
+background:black;
+color:#00ff99;
+font-family:Arial;
+text-align:center;
+padding:30px;
+}
+
+.box{
+border:2px solid #00ff99;
+padding:20px;
+border-radius:15px;
+max-width:500px;
+margin:auto;
+box-shadow:0 0 20px #00ff99;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:10px;
+background:black;
+border:1px solid #00ff99;
+color:#00ff99;
+}
+
+button{
+background:#00ff99;
+border:none;
+padding:10px;
+margin-top:15px;
+width:100%;
+cursor:pointer;
+}
+
+.status{
+margin-top:10px;
+}
+
+.ok{
+color:#00ff99;
+}
+
+.fail{
+color:red;
+}
+
+</style>
 </head>
 
 <body>
@@ -18,21 +61,141 @@ button{background:#00ff66;border:none;padding:10px;width:100%;cursor:pointer;}
 
 <h2>Masukkan API Key</h2>
 
-<input id="apikey" placeholder="sk-xxxxxxxx">
+<input id="openai" placeholder="OpenAI API Key">
 
-<button onclick="saveKey()">Save</button>
+<input id="deepseek" placeholder="DeepSeek API Key">
+
+<input id="gemini" placeholder="Gemini API Key">
+
+<button onclick="verify()">Verifikasi API Key</button>
+
+<div id="status" class="status"></div>
 
 </div>
 
 <script>
 
-function saveKey(){
+async function verify(){
 
-let key=document.getElementById("apikey").value
+let openai=document.getElementById("openai").value
+let deepseek=document.getElementById("deepseek").value
+let gemini=document.getElementById("gemini").value
 
-localStorage.setItem("OPENAI_KEY",key)
+let status=""
 
-window.location="verify.html"
+// simpan key
+if(openai) localStorage.setItem("OPENAI_KEY",openai)
+if(deepseek) localStorage.setItem("DEEPSEEK_KEY",deepseek)
+if(gemini) localStorage.setItem("GEMINI_KEY",gemini)
+
+
+/* cek OpenAI */
+
+if(openai){
+
+try{
+
+let r=await fetch("https://api.openai.com/v1/models",{
+
+headers:{
+Authorization:"Bearer "+openai
+}
+
+})
+
+if(r.status===200){
+
+status+="OpenAI Key Valid ✔<br>"
+
+}else{
+
+status+="OpenAI Key Tidak Valid<br>"
+
+}
+
+}catch{
+
+status+="OpenAI Error<br>"
+
+}
+
+}
+
+
+/* cek DeepSeek */
+
+if(deepseek){
+
+try{
+
+let r=await fetch("https://api.deepseek.com/v1/models",{
+
+headers:{
+Authorization:"Bearer "+deepseek
+}
+
+})
+
+if(r.status===200){
+
+status+="DeepSeek Key Valid ✔<br>"
+
+}else{
+
+status+="DeepSeek Key Tidak Valid<br>"
+
+}
+
+}catch{
+
+status+="DeepSeek Error<br>"
+
+}
+
+}
+
+
+/* cek Gemini */
+
+if(gemini){
+
+try{
+
+let r=await fetch(
+"https://generativelanguage.googleapis.com/v1/models?key="+gemini
+)
+
+if(r.status===200){
+
+status+="Gemini Key Valid ✔<br>"
+
+}else{
+
+status+="Gemini Key Tidak Valid<br>"
+
+}
+
+}catch{
+
+status+="Gemini Error<br>"
+
+}
+
+}
+
+document.getElementById("status").innerHTML=status
+
+
+// jika ada minimal 1 key valid → masuk generator
+if(status.includes("Valid")){
+
+setTimeout(()=>{
+
+window.location="generator.html"
+
+},1500)
+
+}
 
 }
 
