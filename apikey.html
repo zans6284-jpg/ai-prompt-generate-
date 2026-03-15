@@ -1,43 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Masukkan API Key</title>
+<title>API Key</title>
 
 <style>
-body{
-background:black;
-color:white;
-font-family:Arial;
-text-align:center;
-padding:20px;
-}
-
-.box{
-border:2px solid #00ff66;
-padding:20px;
-border-radius:15px;
-max-width:400px;
-margin:auto;
-box-shadow:0 0 20px #00ff66;
-}
-
-input{
-width:100%;
-padding:10px;
-margin-top:10px;
-background:black;
-border:1px solid #00ff66;
-color:white;
-}
-
-button{
-background:#00ff66;
-border:none;
-padding:10px;
-margin-top:10px;
-width:100%;
-cursor:pointer;
-}
+body{background:black;color:white;font-family:Arial;text-align:center;padding:30px;}
+.box{border:2px solid #00ff66;padding:20px;border-radius:15px;max-width:450px;margin:auto;box-shadow:0 0 20px #00ff66;}
+input{width:100%;padding:10px;margin:8px 0;background:black;border:1px solid #00ff66;color:white;}
+button{background:#00ff66;border:none;padding:10px;width:100%;cursor:pointer;}
 </style>
 
 </head>
@@ -46,8 +16,27 @@ cursor:pointer;
 
 <div class="box">
 
-<h2>Masukkan OpenAI API Key</h2>
+<h2>Masukkan API Key</h2>
 
-<input id="apikey" placeholder="sk-xxxxxxxxxxxxxxxx">
+<input id="apikey" placeholder="sk-xxxxxxxx">
 
-<button onclick="saveKey()">Save API Key</button>
+<button onclick="saveKey()">Save</button>
+
+</div>
+
+<script>
+
+function saveKey(){
+
+let key=document.getElementById("apikey").value
+
+localStorage.setItem("OPENAI_KEY",key)
+
+window.location="verify.html"
+
+}
+
+</script>
+
+</body>
+</html>

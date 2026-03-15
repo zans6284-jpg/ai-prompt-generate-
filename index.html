@@ -1,29 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Generator System</title>
+<title>Login System</title>
 
 <style>
 
 body{
-background:#000;
+background:black;
 color:white;
 font-family:Arial;
 text-align:center;
-padding:20px;
+padding:30px;
 }
 
 .box{
 border:2px solid #00ff66;
 padding:20px;
 border-radius:15px;
-max-width:500px;
+max-width:450px;
 margin:auto;
-margin-bottom:25px;
 box-shadow:0 0 20px #00ff66;
 }
 
-input,textarea{
+input{
 width:100%;
 padding:10px;
 margin:8px 0;
@@ -36,14 +35,8 @@ button{
 background:#00ff66;
 border:none;
 padding:10px;
-cursor:pointer;
 width:100%;
-margin-top:8px;
-}
-
-.user{
-border-bottom:1px solid gray;
-padding:8px;
+cursor:pointer;
 }
 
 </style>
@@ -51,7 +44,7 @@ padding:8px;
 
 <body>
 
-<div class="box" id="auth">
+<div class="box">
 
 <h2>LOGIN</h2>
 
@@ -70,88 +63,39 @@ padding:8px;
 
 </div>
 
-
-<div class="box" id="generator" style="display:none">
-
-<h2>AI RP STORY GENERATOR</h2>
-
-<textarea id="prompt" placeholder="Contoh: buatkan saya cerita RP Kekuasaanku"></textarea>
-
-<button onclick="generate()">Generate Cerita AI</button>
-
-<h3>Output Cerita</h3>
-
-<textarea id="output" rows="12"></textarea>
-
-</div>
-
-
-<div class="box" id="adminPanel" style="display:none">
-
-<h2>ADMIN PANEL</h2>
-
-<div id="users"></div>
-
-</div>
-
-
 <script>
 
-// membuat database jika belum ada
 if(!localStorage.getItem("users")){
-localStorage.setItem("users", JSON.stringify([]))
+localStorage.setItem("users",JSON.stringify([]))
 }
 
-// admin login
-const adminEmail="zans6284@gmail.com"
-const adminPass="Login saja"
-
-
-// REGISTER
 function register(){
 
-let username=document.getElementById("regUser").value
-let email=document.getElementById("regEmail").value
-let pass=document.getElementById("regPass").value
+let username=regUser.value
+let email=regEmail.value
+let pass=regPass.value
 
 let db=JSON.parse(localStorage.getItem("users"))
 
-if(db.find(u=>u.email==email)){
-alert("Email sudah terdaftar")
-return
-}
-
 db.push({
-username,
-email,
-pass,
-banned:false
+username,email,pass
 })
 
 localStorage.setItem("users",JSON.stringify(db))
 
 alert("Akun berhasil dibuat")
 
+// reset form
+regUser.value=""
+regEmail.value=""
+regPass.value=""
+
 }
 
-
-// LOGIN
 function login(){
 
-let email=document.getElementById("loginEmail").value
-let pass=document.getElementById("loginPass").value
-
-// admin login
-if(email===adminEmail && pass===adminPass){
-
-document.getElementById("auth").style.display="none"
-document.getElementById("adminPanel").style.display="block"
-
-loadUsers()
-
-return
-
-}
+let email=loginEmail.value
+let pass=loginPass.value
 
 let db=JSON.parse(localStorage.getItem("users"))
 
@@ -162,134 +106,8 @@ alert("Login gagal")
 return
 }
 
-if(user.banned){
-alert("Akun diblokir admin")
-return
-}
-
-document.getElementById("auth").style.display="none"
-document.getElementById("generator").style.display="block"
-
-}
-
-
-// ADMIN PANEL
-function loadUsers(){
-
-let db=JSON.parse(localStorage.getItem("users"))
-
-let html=""
-
-db.forEach((u,i)=>{
-
-html+=`
-<div class="user">
-
-${u.username} | ${u.email} | banned:${u.banned}
-
-<button onclick="ban(${i})">Ban</button>
-<button onclick="unban(${i})">Unban</button>
-<button onclick="del(${i})">Delete</button>
-
-</div>
-`
-
-})
-
-document.getElementById("users").innerHTML=html
-
-}
-
-
-// BAN USER
-function ban(i){
-
-let db=JSON.parse(localStorage.getItem("users"))
-
-db[i].banned=true
-
-localStorage.setItem("users",JSON.stringify(db))
-
-loadUsers()
-
-}
-
-
-// UNBAN USER
-function unban(i){
-
-let db=JSON.parse(localStorage.getItem("users"))
-
-db[i].banned=false
-
-localStorage.setItem("users",JSON.stringify(db))
-
-loadUsers()
-
-}
-
-
-// DELETE USER
-function del(i){
-
-let db=JSON.parse(localStorage.getItem("users"))
-
-db.splice(i,1)
-
-localStorage.setItem("users",JSON.stringify(db))
-
-loadUsers()
-
-}
-
-
-// AI GENERATOR
-async function generate(){
-
-let promptText=document.getElementById("prompt").value
-
-let key = localStorage.getItem("OPENAI_KEY")
-
-if(!key){
-alert("Masukkan API key dulu")
-return
-}
-
-let res = await fetch("https://api.openai.com/v1/chat/completions",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer " + key
-},
-
-body:JSON.stringify({
-
-model:"gpt-4o-mini",
-
-messages:[
-
-{
-role:"system",
-content:"Kamu adalah AI yang membuat cerita RP panjang, epik, detail dan kreatif."
-},
-
-{
-role:"user",
-content:promptText
-}
-
-]
-
-})
-
-})
-
-let data = await res.json()
-
-document.getElementById("output").value =
-data.choices[0].message.content
+// redirect ke halaman API key
+window.location="apikey.html"
 
 }
 

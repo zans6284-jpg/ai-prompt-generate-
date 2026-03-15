@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Generator</title>
+
+<style>
+
+body{
+background:black;
+color:#00ff66;
+font-family:Arial;
+text-align:center;
+padding:20px;
+}
+
+.box{
+border:2px solid #00ff66;
+padding:20px;
+border-radius:15px;
+max-width:700px;
+margin:auto;
+box-shadow:0 0 20px #00ff66;
+}
+
+textarea{
+width:100%;
+padding:10px;
+margin:10px 0;
+background:black;
+border:1px solid #00ff66;
+color:white;
+}
+
+button{
+background:#00ff66;
+border:none;
+padding:12px;
+cursor:pointer;
+width:100%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>AI GENERATOR</h1>
+
+<div class="box">
+
+<textarea id="prompt" placeholder="Masukkan prompt"></textarea>
+
+<button onclick="generate()">Generate Prompt</button>
+
+<h3>Output</h3>
+
+<textarea id="output" rows="12"></textarea>
+
+</div>
+
+<script>
+
+async function generate(){
+
+let prompt=document.getElementById("prompt").value
+
+let key=localStorage.getItem("OPENAI_KEY")
+
+let res=await fetch("https://api.openai.com/v1/chat/completions",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+key
+},
+
+body:JSON.stringify({
+
+model:"gpt-4o-mini",
+
+messages:[
+{role:"system",content:"Buat prompt RP panjang dan kreatif"},
+{role:"user",content:prompt}
+]
+
+})
+
+})
+
+let data=await res.json()
+
+document.getElementById("output").value=data.choices[0].message.content
+
+}
+
+</script>
+
+</body>
+</html>
