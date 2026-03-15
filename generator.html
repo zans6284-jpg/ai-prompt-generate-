@@ -12,6 +12,8 @@ color:#00ff99;
 margin:0;
 }
 
+/* Cyber grid background */
+
 body::before{
 content:"";
 position:fixed;
@@ -38,6 +40,11 @@ margin:auto;
 padding:20px;
 }
 
+.title{
+font-size:30px;
+text-shadow:0 0 10px #00ff99;
+}
+
 .card{
 background:#0a0a0a;
 border:1px solid #00ff99;
@@ -54,6 +61,7 @@ margin-top:10px;
 background:#000;
 border:1px solid #00ff99;
 color:#00ff99;
+border-radius:5px;
 }
 
 button{
@@ -61,15 +69,15 @@ background:#00ff99;
 border:none;
 padding:10px;
 margin-top:10px;
-cursor:pointer;
 width:100%;
+cursor:pointer;
+font-weight:bold;
 }
 
 .library button{
 background:#111;
 border:1px solid #00ff99;
 color:#00ff99;
-margin-top:5px;
 }
 
 .actions{
@@ -87,6 +95,14 @@ margin-top:10px;
 font-size:14px;
 }
 
+.active{
+color:#00ff99;
+}
+
+.inactive{
+color:red;
+}
+
 </style>
 </head>
 
@@ -94,9 +110,9 @@ font-size:14px;
 
 <div class="container">
 
-<h1>AI Generator</h1>
+<h1 class="title">AI Generator</h1>
 
-<div class="status" id="keyStatus"></div>
+<div class="status" id="status"></div>
 
 
 <div class="card">
@@ -110,6 +126,7 @@ font-size:14px;
 </select>
 
 <select id="model">
+<option value="">Auto Model</option>
 <option value="gpt-4o-mini">GPT-4o mini</option>
 <option value="deepseek-chat">DeepSeek Chat</option>
 <option value="gemini-pro">Gemini Pro</option>
@@ -124,13 +141,13 @@ font-size:14px;
 
 <div class="library">
 
-<button onclick="usePrompt('Buat cerita RP fantasy dengan kekuatan dewa.')">Fantasy RP</button>
+<button onclick="setPrompt('Buat cerita RP fantasy dengan kekuatan dewa.')">Fantasy RP</button>
 
-<button onclick="usePrompt('Buat cerita sci-fi tentang manusia yang menguasai AI.')">Sci-Fi Story</button>
+<button onclick="setPrompt('Buat cerita sci-fi tentang manusia yang menguasai AI.')">Sci-Fi Story</button>
 
-<button onclick="usePrompt('Buat dialog roleplay antara pahlawan dan penjahat.')">Hero RP</button>
+<button onclick="setPrompt('Buat dialog roleplay antara pahlawan dan penjahat.')">Hero RP</button>
 
-<button onclick="usePrompt('Buat prompt hypnotic yang kuat.')">Hypnotic</button>
+<button onclick="setPrompt('Buat prompt hypnotic yang kuat.')">Hypnotic</button>
 
 </div>
 
@@ -169,40 +186,60 @@ font-size:14px;
 
 <script>
 
+/* ================= KEY STATUS ================= */
+
 function checkKey(){
 
-let key=localStorage.getItem("OPENAI_KEY")
+let openai = localStorage.getItem("OPENAI_KEY")
+let deepseek = localStorage.getItem("DEEPSEEK_KEY")
+let gemini = localStorage.getItem("GEMINI_KEY")
 
-if(key){
-document.getElementById("keyStatus").innerText="API Key Aktif"
-}else{
-document.getElementById("keyStatus").innerText="API Key belum dimasukkan"
-}
+let text=""
+
+text += openai ? "OpenAI Key Aktif | " : "OpenAI Key Tidak Ada | "
+text += deepseek ? "DeepSeek Key Aktif | " : "DeepSeek Key Tidak Ada | "
+text += gemini ? "Gemini Key Aktif" : "Gemini Key Tidak Ada"
+
+document.getElementById("status").innerText=text
 
 }
 
 checkKey()
 
 
-function usePrompt(text){
+/* ================= PROMPT LIBRARY ================= */
+
+function setPrompt(text){
 
 document.getElementById("prompt").value=text
 
 }
 
 
+/* ================= GENERATE ================= */
+
 async function generate(){
 
 let prompt=document.getElementById("prompt").value
 let provider=document.getElementById("provider").value
 let model=document.getElementById("model").value
-let key=localStorage.getItem("OPENAI_KEY")
+
+let openai=localStorage.getItem("OPENAI_KEY")
+let deepseek=localStorage.getItem("DEEPSEEK_KEY")
+let gemini=localStorage.getItem("GEMINI_KEY")
 
 document.getElementById("output").value="Generating..."
 
 try{
 
+/* OPENAI */
+
 if(provider==="openai"){
+
+if(!openai){
+document.getElementById("output").value="OpenAI API key belum dimasukkan"
+return
+}
 
 let res=await fetch("https://api.openai.com/v1/chat/completions",{
 
@@ -210,45 +247,105 @@ method:"POST",
 
 headers:{
 "Content-Type":"application/json",
-"Authorization":"Bearer "+key
+"Authorization":"Bearer "+openai
 },
 
 body:JSON.stringify({
-model:model,
-messages:[
-{role:"user",content:prompt}
-]
+model:model || "gpt-4o-mini",
+messages:[{role:"user",content:prompt}]
 })
 
 })
 
 let data=await res.json()
 
-document.getElementById("output").value=data.choices[0].message.content
+document.getElementById("output").value=data.choices?.[0]?.message?.content || "Error OpenAI"
 
 }
 
+
+/* DEEPSEEK */
 
 if(provider==="deepseek"){
 
-document.getElementById("output").value="DeepSeek API belum dikonfigurasi"
+if(!deepseek){
+document.getElementById("output").value="DeepSeek API key belum dimasukkan"
+return
+}
+
+let res=await fetch("https://api.deepseek.com/chat/completions",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+deepseek
+},
+
+body:JSON.stringify({
+model:model || "deepseek-chat",
+messages:[{role:"user",content:prompt}]
+})
+
+})
+
+let data=await res.json()
+
+document.getElementById("output").value=data.choices?.[0]?.message?.content || "Error DeepSeek"
 
 }
 
+
+/* GEMINI */
+
 if(provider==="gemini"){
 
-document.getElementById("output").value="Gemini API belum dikonfigurasi"
+if(!gemini){
+document.getElementById("output").value="Gemini API key belum dimasukkan"
+return
+}
+
+let res=await fetch(
+"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key="+gemini,
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+contents:[
+{
+parts:[
+{text:prompt}
+]
+}
+
+]
+
+})
+
+})
+
+let data=await res.json()
+
+document.getElementById("output").value=data.candidates?.[0]?.content?.parts?.[0]?.text || "Error Gemini"
 
 }
 
 }catch(e){
 
-document.getElementById("output").value="Error request"
+document.getElementById("output").value="Request API gagal"
 
 }
 
 }
 
+
+/* ================= UTIL ================= */
 
 function copyText(){
 
@@ -260,13 +357,11 @@ document.execCommand("copy")
 
 }
 
-
 function clearText(){
 
 document.getElementById("output").value=""
 
 }
-
 
 function downloadText(){
 
