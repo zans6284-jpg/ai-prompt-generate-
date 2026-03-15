@@ -97,18 +97,22 @@ padding:8px;
 
 <script>
 
+// membuat database jika belum ada
 if(!localStorage.getItem("users")){
-localStorage.setItem("users",JSON.stringify([]))
+localStorage.setItem("users", JSON.stringify([]))
 }
 
+// admin login
 const adminEmail="zans6284@gmail.com"
 const adminPass="Login saja"
 
+
+// REGISTER
 function register(){
 
-let username=regUser.value
-let email=regEmail.value
-let pass=regPass.value
+let username=document.getElementById("regUser").value
+let email=document.getElementById("regEmail").value
+let pass=document.getElementById("regPass").value
 
 let db=JSON.parse(localStorage.getItem("users"))
 
@@ -130,15 +134,19 @@ alert("Akun berhasil dibuat")
 
 }
 
+
+// LOGIN
 function login(){
 
-let email=loginEmail.value
-let pass=loginPass.value
+let email=document.getElementById("loginEmail").value
+let pass=document.getElementById("loginPass").value
 
+// admin login
 if(email===adminEmail && pass===adminPass){
 
-auth.style.display="none"
-adminPanel.style.display="block"
+document.getElementById("auth").style.display="none"
+document.getElementById("adminPanel").style.display="block"
+
 loadUsers()
 
 return
@@ -159,11 +167,13 @@ alert("Akun diblokir admin")
 return
 }
 
-auth.style.display="none"
-generator.style.display="block"
+document.getElementById("auth").style.display="none"
+document.getElementById("generator").style.display="block"
 
 }
 
+
+// ADMIN PANEL
 function loadUsers(){
 
 let db=JSON.parse(localStorage.getItem("users"))
@@ -186,10 +196,12 @@ ${u.username} | ${u.email} | banned:${u.banned}
 
 })
 
-users.innerHTML=html
+document.getElementById("users").innerHTML=html
 
 }
 
+
+// BAN USER
 function ban(i){
 
 let db=JSON.parse(localStorage.getItem("users"))
@@ -202,6 +214,8 @@ loadUsers()
 
 }
 
+
+// UNBAN USER
 function unban(i){
 
 let db=JSON.parse(localStorage.getItem("users"))
@@ -214,6 +228,8 @@ loadUsers()
 
 }
 
+
+// DELETE USER
 function del(i){
 
 let db=JSON.parse(localStorage.getItem("users"))
@@ -227,15 +243,21 @@ loadUsers()
 }
 
 
+// AI GENERATOR
 async function generate(){
 
 let promptText=document.getElementById("prompt").value
 
+let key = localStorage.getItem("OPENAI_KEY")
+
+if(!key){
+alert("Masukkan API key dulu")
+return
+}
+
 let res = await fetch("https://api.openai.com/v1/chat/completions",{
 
 method:"POST",
-
-let key = localStorage.getItem("OPENAI_KEY")
 
 headers:{
 "Content-Type":"application/json",
@@ -264,7 +286,7 @@ content:promptText
 
 })
 
-let data=await res.json()
+let data = await res.json()
 
 document.getElementById("output").value =
 data.choices[0].message.content
